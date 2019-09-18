@@ -59,7 +59,7 @@ class InstaBot(Bot):
             driver.get(f'{self.url}/explore/tags/{topic.lower()}/')
             links = driver.find_elements_by_xpath('//a[contains(@href, "/p/")]')
 
-            for link in links[:5]:
+            for link in links:
                 photo_urls.append(link.get_attribute('href'))
 
         return photo_urls
