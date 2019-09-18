@@ -59,7 +59,7 @@ class InstaBot(Bot):
             driver.get(f'{self.url}/explore/tags/{topic.lower()}/')
             links = driver.find_elements_by_xpath('//a[contains(@href, "/p/")]')
 
-            for link in links:
+            for link in links[:5]:
                 photo_urls.append(link.get_attribute('href'))
 
         return photo_urls
@@ -67,22 +67,24 @@ class InstaBot(Bot):
     def like_photos(self, topics):
         driver = self.driver
         photo_urls = self.get_photos(topics)
-        print('hmmm')
 
         for url in photo_urls:
             driver.get(url)
 
             try:
-                like_btn = WebDriverWait(driver, 10).until(
+                WebDriverWait(driver, 10).until(
                     EC.element_to_be_clickable(
                         (By.XPATH, 
-                        ('//span[contains(@class, '
-                        '"glyphsSpriteHeart__outline__24__grey_9 u-__7")]'))))
+                        '//span[contains(@aria-label, "Like")]')))
             except TimeoutException:
                 print('Page took too long to load')
                 driver.quit()
+
+            try:
+                like_btn = driver.find_element_by_xpath(
+                    '//span[contains(@aria-label, "Like") and contains(@class, "24__grey_9")]')
             except NoSuchElementException:
-                print('Whawhawhaaaa')
+                pass  # photo has already been liked
             else:
                 like_btn.click()
                 sleep(18)
