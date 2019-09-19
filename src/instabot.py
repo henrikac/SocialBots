@@ -78,7 +78,7 @@ class InstaBot(Bot):
                         '//span[contains(@aria-label, "Like")]')))
             except TimeoutException:
                 print('Page took too long to load')
-                driver.quit()
+                continue
 
             try:
                 like_btn = driver.find_element_by_xpath(
