@@ -13,47 +13,45 @@ from bot import Bot
 class InstaBot(Bot):
     url = 'https://www.instagram.com'
 
+    def __try_find_element(self, xpath):
+        driver = self.driver
+
+        try:
+            element = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable(
+                    (By.XPATH, xpath)))
+        except TimeoutException:
+            print('Page took too long to load')
+            driver.quit()
+
+        return element
+
     def login(self):
         driver = self.driver
         driver.get(self.url)
 
-        try:
-            login_link = WebDriverWait(driver, 10).until(
-                EC.element_to_be_clickable(
-                    (By.XPATH, '//a[contains(@href, "/accounts/login/")]')))
-        except TimeoutException:
-            print('Page took too long to load')
-            driver.quit()
-        else:
-            login_link.click()
+        login_link = self.__try_find_element(
+            '//a[contains(@href, "/accounts/login/")]')
+        login_link.click()
 
-        try:
-            login_btn = WebDriverWait(driver, 10).until(
-                EC.element_to_be_clickable(
-                    (By.XPATH, '//button[@type="submit"]/div[contains(., "Log In")]')))
-        except TimeoutException:
-            print('Page took too long to load')
-            driver.quit()
-        else:
-            username = driver.find_element_by_xpath('//input[contains(@name, "username")]')
-            username.clear()
-            username.send_keys(self.username)
-            password = driver.find_element_by_xpath('//input[contains(@name, "password")]')
-            password.clear()
-            password.send_keys(self.password)
-            password.send_keys(Keys.RETURN)
+        login_btn = self.__try_find_element(
+            '//button[@type="submit"]/div[contains(., "Log In")]')
+        username = driver.find_element_by_xpath(
+            '//input[contains(@name, "username")]')
+        username.clear()
+        username.send_keys(self.username)
+        password = driver.find_element_by_xpath(
+            '//input[contains(@name, "password")]')
+        password.clear()
+        password.send_keys(self.password)
+        password.send_keys(Keys.RETURN)
 
     def get_photos(self, topics):
         driver = self.driver
         photo_urls = []
 
-        try:
-            logged_in = WebDriverWait(driver, 10).until(
-                EC.element_to_be_clickable(
-                    (By.XPATH, '//span[contains(@aria-label, "Profile")]')))
-        except TimeoutException:
-            print('Page took too long to load')
-            driver.quit()
+        logged_in = self.__try_find_element(
+            '//span[contains(@aria-label, "Profile")]')
 
         for topic in topics:
             driver.get(f'{self.url}/explore/tags/{topic.lower()}/')
@@ -88,4 +86,6 @@ class InstaBot(Bot):
             else:
                 like_btn.click()
                 sleep(18)
+
+        driver.quit()
 
