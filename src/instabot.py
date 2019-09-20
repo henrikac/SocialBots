@@ -14,19 +14,21 @@ class InstaBot(Bot):
     url = 'https://www.instagram.com'
 
     def __try_find_element(self, xpath):
-        driver = self.driver
-
+        """Tries to find an element
+        Returns the element if found, otherwise closes the browser
+        """
         try:
-            element = WebDriverWait(driver, 10).until(
+            element = WebDriverWait(self.driver, 10).until(
                 EC.element_to_be_clickable(
                     (By.XPATH, xpath)))
         except TimeoutException:
             print('Page took too long to load')
-            driver.quit()
+            self.quit()
 
         return element
 
     def login(self):
+        """Login a user"""
         driver = self.driver
         driver.get(self.url)
 
@@ -47,6 +49,9 @@ class InstaBot(Bot):
         password.send_keys(Keys.RETURN)
 
     def get_photos(self, topics):
+        """Gets all photos of specific topics
+        Returns the urls of the photos
+        """
         driver = self.driver
         photo_urls = []
 
@@ -63,6 +68,7 @@ class InstaBot(Bot):
         return photo_urls
 
     def like_photos(self, topics):
+        """Likes the photos of specific topics"""
         driver = self.driver
         photo_urls = self.get_photos(topics)
 
@@ -86,6 +92,4 @@ class InstaBot(Bot):
             else:
                 like_btn.click()
                 sleep(18)
-
-        driver.quit()
 
