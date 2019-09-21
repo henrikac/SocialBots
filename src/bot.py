@@ -7,3 +7,6 @@ class Bot:
         self.password = password
         self.driver = webdriver.Firefox()
 
+    def quit(self):
+        self.driver.quit()
+
