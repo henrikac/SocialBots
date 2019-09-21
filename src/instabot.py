@@ -1,4 +1,5 @@
 from time import sleep
+from typing import List
 
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
@@ -8,12 +9,13 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from bot import Bot
+import models
 
 
 class InstaBot(Bot):
     url = 'https://www.instagram.com'
 
-    def __try_find_element(self, xpath):
+    def __try_find_element(self, xpath: str):
         """Tries to find an element
         Returns the element if found, otherwise closes the browser
         """
@@ -27,7 +29,7 @@ class InstaBot(Bot):
 
         return element
 
-    def login(self):
+    def login(self) -> None:
         """Login a user"""
         driver = self.driver
         driver.get(self.url)
@@ -48,7 +50,7 @@ class InstaBot(Bot):
         password.send_keys(self.password)
         password.send_keys(Keys.RETURN)
 
-    def get_photos(self, topics):
+    def get_photos(self, topics: List[str]) -> List[str]:
         """Gets all photos of specific topics
         Returns the urls of the photos
         """
@@ -63,11 +65,14 @@ class InstaBot(Bot):
             links = driver.find_elements_by_xpath('//a[contains(@href, "/p/")]')
 
             for link in links:
-                photo_urls.append(link.get_attribute('href'))
+                url = link.get_attribute('href')
+
+                if not models.get_instaphoto(url):
+                    photo_urls.append(url)
 
         return photo_urls
 
-    def like_photos(self, topics):
+    def like_photos(self, topics: List[str]) -> None:
         """Likes the photos of specific topics"""
         driver = self.driver
         photo_urls = self.get_photos(topics)
@@ -81,15 +86,28 @@ class InstaBot(Bot):
                         (By.XPATH, 
                         '//span[contains(@aria-label, "Like")]')))
             except TimeoutException:
-                print('Page took too long to load')
                 continue
 
             try:
                 like_btn = driver.find_element_by_xpath(
                     '//span[contains(@aria-label, "Like") and contains(@class, "24__grey_9")]')
+                author = driver.find_element_by_xpath(
+                    ('//*[@id="react-root"]/section/main/div/div/'
+                    'article/header/div[2]/div[1]/div[1]/h2/a'))
             except NoSuchElementException:
-                pass  # photo has already been liked
+                try:
+                    unlike = driver.find_element_by_xpath(
+                        '//span[contains(@aria-label, "Unlike")]')
+                    author = driver.find_element_by_xpath(
+                        ('//*[@id="react-root"]/section/main/div/div/'
+                        'article/header/div[2]/div[1]/div[1]/h2/a'))
+                except NoSuchElementException:
+                    pass
+                else:
+                    models.add_instaphoto({'url': url, 'author': author.text})
+                    sleep(18)
             else:
                 like_btn.click()
+                models.add_instaphoto({'url': url, 'author': author.text})
                 sleep(18)
 
