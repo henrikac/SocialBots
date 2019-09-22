@@ -29,6 +29,22 @@ class InstaBot(Bot):
 
         return element
 
+    def __already_liked(self, url: str) -> None:
+        """Checks if a photo has already been liked
+        Saves the photo details to the database if photo has already been liked
+        """
+        try:
+            unlike = self.driver.find_element_by_xpath(
+                '//span[contains(@aria-label, "Unlike")]')
+            author = self.driver.find_element_by_xpath(
+                ('//*[@id="react-root"]/section/main/div/div/'
+                'article/header/div[2]/div[1]/div[1]/h2/a'))
+        except NoSuchElementException:
+            pass
+        else:
+            models.add_instaphoto({'url': url, 'author': author.text})
+            sleep(18)
+
     def login(self) -> None:
         """Login a user"""
         driver = self.driver
@@ -95,17 +111,7 @@ class InstaBot(Bot):
                     ('//*[@id="react-root"]/section/main/div/div/'
                     'article/header/div[2]/div[1]/div[1]/h2/a'))
             except NoSuchElementException:
-                try:
-                    unlike = driver.find_element_by_xpath(
-                        '//span[contains(@aria-label, "Unlike")]')
-                    author = driver.find_element_by_xpath(
-                        ('//*[@id="react-root"]/section/main/div/div/'
-                        'article/header/div[2]/div[1]/div[1]/h2/a'))
-                except NoSuchElementException:
-                    pass
-                else:
-                    models.add_instaphoto({'url': url, 'author': author.text})
-                    sleep(18)
+                self.__already_liked(url)
             else:
                 like_btn.click()
                 models.add_instaphoto({'url': url, 'author': author.text})
