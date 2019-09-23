@@ -1,3 +1,4 @@
+import random
 from time import sleep
 from typing import List
 
@@ -86,14 +87,16 @@ class InstaBot(Bot):
                 if not models.get_instaphoto(url):
                     photo_urls.append(url)
 
-        return photo_urls
+        return list(set(photo_urls))
 
     def like_photos(self, topics: List[str]) -> None:
         """Likes the photos of specific topics"""
         driver = self.driver
         photo_urls = self.get_photos(topics)
 
-        for url in photo_urls:
+        for _ in range(len(photo_urls)):
+            url = random.choice(photo_urls)
+            photo_urls.remove(url)
             driver.get(url)
 
             try:
