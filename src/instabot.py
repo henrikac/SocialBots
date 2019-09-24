@@ -46,8 +46,43 @@ class InstaBot(Bot):
             models.add_instaphoto({'url': url, 'author': author.text})
             sleep(18)
 
+    def __is_valid_topic(self, topic: str) -> None:
+        """Checks if a topic is valid"""
+        if len(topic) < 1:
+            raise ValueError('A topic has to be at least 1 character long')
+        elif not topic.isalpha():
+            raise ValueError('A topic can only contain alphabetic characters')
+
+    def prompt_for_topics(self) -> List[str]:
+        """Prompts the user for topics to search for
+        Returns a list of topics entered by the user
+        """
+        topics = []
+
+        print('\nEnter topics to search for:')
+        print('(Enter \'q\' when you\'re done)\n')
+
+        while True:
+            topic = input('Topic: ')
+
+            if topic.lower() == 'q':
+                break
+
+            try:
+                self.__is_valid_topic(topic)
+            except ValueError as err:
+                print(f'Error: {err}')
+                continue
+
+            if topic not in topics:
+                topics.append(topic)
+
+        return topics
+
     def login(self) -> None:
         """Login a user"""
+        self.driver = webdriver.Firefox()
+
         driver = self.driver
         driver.get(self.url)
 

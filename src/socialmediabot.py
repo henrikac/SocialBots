@@ -2,7 +2,7 @@ from getpass import getpass
 from typing import Tuple
 
 from instabot import InstaBot
-from utils import clear_terminal, prompt_for_int, prompt_for_topics
+from utils import clear_terminal, prompt_for_int
 
 
 class SocialMediaBot:
@@ -40,8 +40,8 @@ class SocialMediaBot:
         clear_terminal()
         self.__display_title('Instagram Bot')
         username, password = self.prompt_credentials()
-        topics = prompt_for_topics()
         bot = InstaBot(username, password)
+        topics = bot.prompt_for_topics()
         bot.login()
         bot.like_photos(topics)
         bot.quit()
@@ -64,6 +64,7 @@ class SocialMediaBot:
                 self.quit()
             elif user_choice == 1:
                 self.instabot()
+                clear_terminal()
                 self.__display_title('Social Media Bots')
                 self.__display_menu()
 
