@@ -16,20 +16,6 @@ import models
 class InstaBot(Bot):
     url = 'https://www.instagram.com'
 
-    def __try_find_element(self, xpath: str):
-        """Tries to find an element
-        Returns the element if found, otherwise closes the browser
-        """
-        try:
-            element = WebDriverWait(self.driver, 10).until(
-                EC.element_to_be_clickable(
-                    (By.XPATH, xpath)))
-        except TimeoutException:
-            print('Page took too long to load')
-            self.quit()
-
-        return element
-
     def __already_liked(self, url: str) -> None:
         """Checks if a photo has already been liked
         Saves the photo details to the database if photo has already been liked
@@ -86,11 +72,11 @@ class InstaBot(Bot):
         driver = self.driver
         driver.get(self.url)
 
-        login_link = self.__try_find_element(
+        login_link = self.try_find_element(
             '//a[contains(@href, "/accounts/login/")]')
         login_link.click()
 
-        login_btn = self.__try_find_element(
+        login_btn = self.try_find_element(
             '//button[@type="submit"]/div[contains(., "Log In")]')
         username = driver.find_element_by_xpath(
             '//input[contains(@name, "username")]')
@@ -109,8 +95,8 @@ class InstaBot(Bot):
         driver = self.driver
         photo_urls = []
 
-        logged_in = self.__try_find_element(
-            '//span[contains(@aria-label, "Profile")]')
+        logged_in = self.try_find_element(
+            f'//*[local-name() = "svg" and contains(@aria-label, "Profile")]')
 
         for topic in topics:
             driver.get(f'{self.url}/explore/tags/{topic.lower()}/')
@@ -137,14 +123,14 @@ class InstaBot(Bot):
             try:
                 WebDriverWait(driver, 10).until(
                     EC.element_to_be_clickable(
-                        (By.XPATH, 
-                        '//span[contains(@aria-label, "Like")]')))
+                        (By.XPATH,
+                        '//*[local-name() = "svg" and contains(@aria-label, "Like")]')))
             except TimeoutException:
                 continue
 
             try:
                 like_btn = driver.find_element_by_xpath(
-                    '//span[contains(@aria-label, "Like") and contains(@class, "24__grey_9")]')
+                    '//*[local-name() = "svg" and contains(@aria-label, "Like") and contains(@class, "_8-yf5 ")]')
                 author = driver.find_element_by_xpath(
                     ('//*[@id="react-root"]/section/main/div/div/'
                     'article/header/div[2]/div[1]/div[1]/h2/a'))
